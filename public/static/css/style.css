@@ -2304,3 +2304,27 @@ body {
         margin-top: 6px;
     }
 }
+
+/* 전체 보기 버튼 */
+.view-all-button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 16px;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-all-button:hover {
+    background: var(--hover-color);
+    border-color: var(--primary-color);
+}
+
+.view-all-button:active {
+    transform: scale(0.98);
+}

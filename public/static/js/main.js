@@ -620,6 +620,7 @@ function createCommentElement(comment, isModal = false, index = 0) {
 function renderGroupBuyCards(groupBuys) {
     const section = document.querySelector('.group-buy-section');
     const container = document.getElementById('detailGroupBuyCards');
+    const viewAllBtn = document.getElementById('viewAllGroupBuysBtn');
     
     if (!container || !section) return;
     
@@ -634,6 +635,7 @@ function renderGroupBuyCards(groupBuys) {
     
     if (groupBuys.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 20px;">아직 공동구매 진행 중인 건이 없습니다.</p>';
+        if (viewAllBtn) viewAllBtn.style.display = 'none';
         return;
     }
     
@@ -641,6 +643,12 @@ function renderGroupBuyCards(groupBuys) {
         const card = createGroupBuyCard(groupBuy);
         container.appendChild(card);
     });
+    
+    // 5개 이상이면 전체 보기 버튼 표시 (실제로는 5개만 보이므로 항상 더 있을 수 있음)
+    // API가 최근 5개만 반환하므로, 5개면 더 있을 가능성이 높음
+    if (viewAllBtn) {
+        viewAllBtn.style.display = groupBuys.length >= 5 ? 'block' : 'none';
+    }
     
     // 카운트다운 시작
     startCountdowns();
@@ -2787,3 +2795,52 @@ function navigateToMainFromMyPage() {
     document.getElementById('mainPage').classList.add('active');
     window.scrollTo(0, 0);
 }
+
+// 공동구매 전체 보기 모달
+async function showAllGroupBuys() {
+    const modal = document.getElementById('allGroupBuysModal');
+    const container = document.getElementById('allGroupBuysList');
+    
+    if (!modal || !container) return;
+    
+    try {
+        // 전체 공동구매 API 호출
+        const response = await fetch(`/api/gifts/${currentGiftId}/group-buys/all`);
+        const data = await response.json();
+        
+        container.innerHTML = '';
+        
+        if (data.groupBuys && data.groupBuys.length > 0) {
+            data.groupBuys.forEach(groupBuy => {
+                const card = createGroupBuyCard(groupBuy);
+                container.appendChild(card);
+            });
+            
+            // 카운트다운 시작
+            startCountdowns();
+        } else {
+            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">공동구매 내역이 없습니다.</p>';
+        }
+        
+        modal.style.display = 'block';
+    } catch (error) {
+        console.error('전체 공동구매 로드 실패:', error);
+        alert('공동구매 내역을 불러오는데 실패했습니다.');
+    }
+}
+
+// 공동구매 전체 보기 모달 닫기
+function closeAllGroupBuysModal() {
+    const modal = document.getElementById('allGroupBuysModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// 모달 외부 클릭 시 닫기
+window.addEventListener('click', (e) => {
+    const modal = document.getElementById('allGroupBuysModal');
+    if (e.target === modal) {
+        closeAllGroupBuysModal();
+    }
+});

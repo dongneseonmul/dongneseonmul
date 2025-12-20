@@ -103,6 +103,9 @@
                     <div id="detailGroupBuyCards" class="group-buy-cards">
                         <!-- 공동구매 카드들이 동적으로 추가됩니다 -->
                     </div>
+                    <button id="viewAllGroupBuysBtn" class="view-all-button" onclick="showAllGroupBuys()" style="display: none;">
+                        전체 보기
+                    </button>
                 </section>
 
                 <section class="together-section">
@@ -719,6 +722,21 @@
             <span>마이페이지</span>
         </button>
     </nav>
+
+    <!-- 공동구매 전체 보기 모달 -->
+    <div id="allGroupBuysModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>전체 공동구매 내역</h2>
+                <button class="modal-close" onclick="closeAllGroupBuysModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="allGroupBuysList" class="group-buy-cards">
+                    <!-- 전체 공동구매 카드들이 동적으로 추가됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="/static/js/data.js?v=20241216-111"></script>
     <script src="/static/js/api.js?v=20241220-001"></script>

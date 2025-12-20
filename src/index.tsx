@@ -208,13 +208,13 @@ app.get('/api/gifts/:id', async (c) => {
     empathy: c.likes || 0
   }))
   
-  // Get group buys (both active and completed from last 24 hours)
+  // Get group buys (최근 5개: 미완료 우선, 그 다음 최신순)
   const groupBuys = await DB.prepare(`
     SELECT gb.*
     FROM group_buys gb
-    WHERE gb.gift_id = ? 
-      AND (gb.is_complete = 0 OR datetime(gb.created_at) > datetime('now', '-1 day'))
+    WHERE gb.gift_id = ?
     ORDER BY gb.is_complete ASC, gb.created_at DESC
+    LIMIT 5
   `).bind(id).all()
   
   // Get participants for each group buy
@@ -449,6 +449,38 @@ app.post('/api/group-buys/:id/join', async (c) => {
   }
   
   return c.json({ success: true, complete: false })
+})
+
+// Get all group buys for a gift (전체 보기)
+app.get('/api/gifts/:id/group-buys/all', async (c) => {
+  const id = c.req.param('id')
+  const { DB } = c.env
+  
+  const groupBuys = await DB.prepare(`
+    SELECT gb.*
+    FROM group_buys gb
+    WHERE gb.gift_id = ?
+    ORDER BY gb.is_complete ASC, gb.created_at DESC
+  `).bind(id).all()
+  
+  // Get participants for each group buy
+  for (const gb of groupBuys.results) {
+    const participants = await DB.prepare(`
+      SELECT u.nickname
+      FROM group_buy_participants gbp
+      JOIN users u ON gbp.user_id = u.id
+      WHERE gbp.group_buy_id = ?
+    `).bind(gb.id).all()
+    
+    gb.users = participants.results.map((p: any) => ({
+      initial: getInitial(p.nickname),
+      color: getRandomColor()
+    }))
+    
+    gb.current_count = participants.results.length
+  }
+  
+  return c.json({ groupBuys: toCamelCase(groupBuys.results) })
 })
 
 // ============================================
