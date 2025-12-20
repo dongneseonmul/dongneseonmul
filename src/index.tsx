@@ -208,12 +208,13 @@ app.get('/api/gifts/:id', async (c) => {
     empathy: c.likes || 0
   }))
   
-  // Get group buys
+  // Get group buys (both active and completed from last 24 hours)
   const groupBuys = await DB.prepare(`
     SELECT gb.*
     FROM group_buys gb
-    WHERE gb.gift_id = ? AND gb.is_complete = 0
-    ORDER BY gb.created_at DESC
+    WHERE gb.gift_id = ? 
+      AND (gb.is_complete = 0 OR datetime(gb.created_at) > datetime('now', '-1 day'))
+    ORDER BY gb.is_complete ASC, gb.created_at DESC
   `).bind(id).all()
   
   // Get participants for each group buy
@@ -428,6 +429,21 @@ app.post('/api/group-buys/:id/join', async (c) => {
     await DB.prepare('UPDATE group_buys SET is_complete = 1 WHERE id = ?')
       .bind(id)
       .run()
+    
+    // Create purchase records for all participants
+    const participants = await DB.prepare('SELECT user_id FROM group_buy_participants WHERE group_buy_id = ?')
+      .bind(id)
+      .all()
+    
+    for (const participant of participants.results) {
+      const voucherCode = generateVoucherCode()
+      const expiryDate = getExpiryDate()
+      
+      await DB.prepare(`
+        INSERT INTO purchases (user_id, gift_id, quantity, voucher_code, expiry_date)
+        VALUES (?, ?, 1, ?, ?)
+      `).bind(participant.user_id, groupBuy.gift_id, voucherCode, expiryDate).run()
+    }
     
     return c.json({ success: true, complete: true })
   }
