@@ -2453,9 +2453,11 @@ async function restoreLoginState() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
         currentUser = JSON.parse(savedUser);
+        console.log('🔍 localStorage에서 사용자 복원:', currentUser);
         
         // id가 없는 경우 백엔드에서 다시 가져오기
         if (!currentUser.id && currentUser.phoneNumber && currentUser.nickname) {
+            console.log('⚠️ 사용자 ID 없음 - 백엔드에서 복원 시도');
             try {
                 const response = await fetch('/api/auth/login', {
                     method: 'POST',
@@ -2472,8 +2474,10 @@ async function restoreLoginState() {
                     console.log('✅ 사용자 ID 복원됨:', currentUser.id);
                 }
             } catch (error) {
-                console.error('사용자 ID 복원 실패:', error);
+                console.error('❌ 사용자 ID 복원 실패:', error);
             }
+        } else if (currentUser.id) {
+            console.log('✅ 사용자 ID 이미 존재:', currentUser.id);
         }
         
         isLoggedIn = true;
