@@ -2668,75 +2668,77 @@ function confirmVerification() {
 }
 
 // 로그인 처리
-function processLogin(phoneNumber, nickname) {
-    const phoneKey = phoneNumber.replace(/-/g, '');
-    
-    // 기존 사용자 확인
-    const existingUser = usersDatabase[phoneKey];
-    
-    let isNewUser = false;
-    
-    if (existingUser) {
-        // 기존 사용자 - 닉네임 변경 확인
-        const oldNickname = existingUser.nickname;
+async function processLogin(phoneNumber, nickname) {
+    try {
+        // 백엔드 API로 로그인
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phoneNumber, nickname })
+        });
         
-        if (oldNickname !== nickname) {
-            // 닉네임이 변경됨 - 모든 데이터 업데이트
-            updateUserDataNickname(oldNickname, nickname);
+        const result = await response.json();
+        
+        if (!response.ok || !result.success) {
+            alert('로그인에 실패했습니다. 다시 시도해주세요.');
+            return;
         }
         
-        // 사용자 정보 업데이트
-        existingUser.nickname = nickname;
-    } else {
-        // 신규 사용자
-        isNewUser = true;
+        const user = result.user;
+        
+        // 현재 사용자 설정 (id 포함)
+        currentUser = {
+            id: user.id,
+            phoneNumber: user.phone_number,
+            nickname: user.nickname
+        };
+        isLoggedIn = true;
+        
+        // 로컬스토리지에 저장
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        // 로컬 데이터베이스 호환성 유지
+        const phoneKey = phoneNumber.replace(/-/g, '');
         usersDatabase[phoneKey] = {
             phoneNumber: phoneNumber,
             nickname: nickname
         };
         
-        // 좋아요 데이터 초기화
-        userLikesDatabase[phoneKey] = {
-            gifts: [],
-            togetherPosts: []
-        };
-    }
-    
-    // 현재 사용자 설정
-    currentUser = {
-        phoneNumber: phoneNumber,
-        nickname: nickname
-    };
-    isLoggedIn = true;
-    
-    // 로컬스토리지에 저장
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    // 사용자의 좋아요 데이터 로드
-    if (userLikesDatabase[phoneKey]) {
-        userLikes.gifts = [...userLikesDatabase[phoneKey].gifts];
-        userLikes.togetherPosts = [...userLikesDatabase[phoneKey].togetherPosts];
-    }
-    
-    // 모달 먼저 닫기
-    closeAuthModal();
-    
-    // UI 업데이트
-    updateUserNickname();
-    updateMyPageUI();
-    
-    // 화면 새로고침
-    renderGiftCards();
-    renderTogetherCards();
-    
-    // 로그인 완료 알림 (모달 닫힌 후)
-    setTimeout(() => {
-        if (isNewUser) {
-            alert(`🎉 회원가입이 완료되었습니다!\n\n${nickname}님, 환영합니다!`);
-        } else {
-            alert(`${nickname}님, 다시 오신 것을 환영합니다! 😊`);
+        if (!userLikesDatabase[phoneKey]) {
+            userLikesDatabase[phoneKey] = {
+                gifts: [],
+                togetherPosts: []
+            };
         }
-    }, 100);
+        
+        const phoneKey = phoneNumber.replace(/-/g, '');
+    
+        // 사용자의 좋아요 데이터 로드
+        if (userLikesDatabase[phoneKey]) {
+            userLikes.gifts = [...userLikesDatabase[phoneKey].gifts];
+            userLikes.togetherPosts = [...userLikesDatabase[phoneKey].togetherPosts];
+        }
+        
+        // 모달 먼저 닫기
+        closeAuthModal();
+        
+        // UI 업데이트
+        updateUserNickname();
+        updateMyPageUI();
+        
+        // 화면 새로고침
+        renderGiftCards();
+        renderTogetherCards();
+        
+        // 로그인 완료 알림 (모달 닫힌 후)
+        setTimeout(() => {
+            alert(`${nickname}님, 환영합니다! 😊`);
+        }, 100);
+        
+    } catch (error) {
+        console.error('로그인 오류:', error);
+        alert('로그인 중 오류가 발생했습니다. 다시 시도해주세요.');
+    }
 }
 
 // 닉네임 변경 시 모든 데이터 동기화
