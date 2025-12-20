@@ -50,6 +50,20 @@ function getRandomColor(): string {
   return colors[Math.floor(Math.random() * colors.length)]
 }
 
+// Convert snake_case to camelCase for frontend compatibility
+function toCamelCase(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(item => toCamelCase(item))
+  } else if (obj !== null && typeof obj === 'object') {
+    return Object.keys(obj).reduce((acc, key) => {
+      const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+      acc[camelKey] = toCamelCase(obj[key])
+      return acc
+    }, {} as any)
+  }
+  return obj
+}
+
 // ============================================
 // Authentication API
 // ============================================
@@ -147,7 +161,7 @@ app.get('/api/gifts', async (c) => {
     gift.images = images.results.map((img: any) => img.image_url)
   }
   
-  return c.json({ gifts: gifts.results })
+  return c.json({ gifts: toCamelCase(gifts.results) })
 })
 
 // Get gift by ID with full details
@@ -226,7 +240,7 @@ app.get('/api/gifts/:id', async (c) => {
   
   gift.togetherPosts = togetherPosts.results
   
-  return c.json({ gift })
+  return c.json({ gift: toCamelCase(gift) })
 })
 
 // Toggle gift like
@@ -424,7 +438,7 @@ app.get('/api/together-posts', async (c) => {
     ORDER BY tp.created_at DESC
   `).all()
   
-  return c.json({ posts: posts.results })
+  return c.json({ posts: toCamelCase(posts.results) })
 })
 
 // Get together post by ID
@@ -455,7 +469,7 @@ app.get('/api/together-posts/:id', async (c) => {
   
   post.applications = applications.results
   
-  return c.json({ post })
+  return c.json({ post: toCamelCase(post) })
 })
 
 // Create together post
@@ -631,7 +645,7 @@ app.get('/api/purchases/:userId', async (c) => {
     ORDER BY p.created_at DESC
   `).bind(userId).all()
   
-  return c.json({ purchases: purchases.results })
+  return c.json({ purchases: toCamelCase(purchases.results) })
 })
 
 // Update purchase review status
