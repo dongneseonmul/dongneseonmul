@@ -237,7 +237,8 @@ app.get('/api/gifts/:id', async (c) => {
   
   // Get related together posts
   const togetherPosts = await DB.prepare(`
-    SELECT tp.*, u.nickname
+    SELECT tp.*, u.nickname,
+           (SELECT COUNT(*) FROM together_likes WHERE post_id = tp.id) as likes
     FROM together_posts tp
     JOIN users u ON tp.user_id = u.id
     WHERE tp.store_name LIKE ? AND tp.status = 'open'
@@ -245,7 +246,12 @@ app.get('/api/gifts/:id', async (c) => {
     LIMIT 5
   `).bind(`%${gift.store_name}%`).all()
   
-  gift.togetherPosts = togetherPosts.results
+  // Add frontend-compatible fields to together posts
+  gift.togetherPosts = togetherPosts.results.map((p: any) => ({
+    ...p,
+    time: p.created_at?.split(' ')[1]?.substring(0, 5) || '',
+    date: p.visit_date || '',
+  }))
   
   return c.json({ gift: toCamelCase(gift) })
 })
