@@ -5,6 +5,14 @@
 **동네선물**은 동네의 엄선된 소상공인 장소들을 방문하고 환급 받을 수 있는 혁신적인 플랫폼입니다. 
 Hono + Cloudflare Pages + D1 데이터베이스로 구축된 풀스택 웹 애플리케이션입니다.
 
+### ✅ 최신 업데이트 (2025-12-20)
+
+- **프론트엔드 API 완전 연동 완료**: 모든 기능이 백엔드 API를 통해 작동
+- **실시간 데이터 동기화**: localStorage 대신 실제 D1 데이터베이스 사용
+- **로그인 세션 관리**: 사용자 인증 및 권한 관리 구현
+- **좋아요, 구매, 공동구매 API 연동 완료**
+- **같이가요 게시판 API 연동 완료**
+
 ### 핵심 특징
 
 - 🏪 **소상공인 지원**: 동네 엄선된 소상공인 가게 할인 방문권
@@ -14,10 +22,11 @@ Hono + Cloudflare Pages + D1 데이터베이스로 구축된 풀스택 웹 애�
 - 🎫 **자유로운 선물**: 구매한 방문권을 친구에게 선물 가능
 - 💬 **후기 시스템**: 방문 후 후기 작성 및 영수증 제출로 환급
 
-## 🔗 공개 URL
+## 🔗 주요 링크
 
 - **개발 서버**: https://3000-ijb6lnvhjqs8sh7x574pv-3844e1b6.sandbox.novita.ai
 - **API 엔드포인트**: https://3000-ijb6lnvhjqs8sh7x574pv-3844e1b6.sandbox.novita.ai/api
+- **프로젝트 백업 (API 연동 완료)**: https://www.genspark.ai/api/files/s/W4ryaxbp
 
 ## 🛠 기술 스택
 
@@ -158,51 +167,26 @@ webapp/
 
 ## 🎯 주요 기능 (완료)
 
-### 1. 인증 시스템 ✅
-- 전화번호 기반 SMS 인증
-- 닉네임 관리
-- 로그인/로그아웃
+### ✅ 백엔드 API (완료)
+- **인증 시스템**: 전화번호 기반 SMS 인증, 로그인/회원가입
+- **동네선물 API**: 목록, 상세, 좋아요 토글
+- **후기 시스템**: 후기 작성, 공감 기능
+- **공동구매 시스템**: 생성, 참여, 자동 성사
+- **같이가요 API**: 게시글 CRUD, 신청, 승인/거절
+- **구매 관리**: 구매 생성, 조회, 후기/영수증 업데이트
 
-### 2. 동네선물 메인화면 ✅
-- 동네 엄선된 장소의 할인 방문권 목록
-- 이미지 슬라이더 (1:1 비율)
-- 환급률 표시
-- 좋아요, 공유하기 기능
+### ✅ 프론트엔드 (API 연동 완료)
+- **동네선물 화면**: API에서 실시간 데이터 로드
+- **상세 페이지**: 상품 상세 정보, 이미지 슬라이더
+- **로그인 시스템**: 사용자 인증 및 세션 관리
+- **좋아요 기능**: 백엔드와 실시간 동기화
+- **구매 시스템**: 방문권 코드 자동 생성
+- **같이가요 게시판**: 게시글 작성, 조회, 신청
+- **마이페이지**: 구매 내역, 내가 쓴/신청한 같이가요, 좋아요 목록
 
-### 3. 동네선물 상세화면 ✅
-- 상세 이미지 슬라이더
-- 상품명, 가격, 환급률 정보
-- 상세 소개 및 가게 정보
-- 추천 후기 섹션
-- 공동구매 섹션
-- 같이가요 섹션
-
-### 4. 공동구매 시스템 ✅
-- 공동구매 신청 및 참여
-- 24시간 내 2명 모집 시 자동 성사
-- 실시간 카운트다운 타이머
-
-### 5. 구매 및 결제 ✅
-- 수량 선택
-- 0원 결제 (보증금 개념)
-- 방문권 코드 자동 생성
-- 유효기간 3개월
-
-### 6. 같이가요 시스템 ✅
-- 게시글 작성 및 조회
-- 참여 신청 및 승인/거절
-- 작성자 정보 공개
-
-### 7. 마이페이지 ✅
-- 구매 내역
-- 내가 쓴 같이가요
-- 신청한 같이가요
-- 내 좋아요 (동네선물/같이가요)
-
-### 8. 후기 작성 및 환급 ✅
-- 후기 작성 모달
-- 영수증 제출 버튼
-- 환급 프로세스 안내
+### ⏳ 배포 대기 중
+- **GitHub 연동**: 사용자 인증 필요 (#github 탭에서 설정)
+- **Cloudflare Pages**: API 키 설정 필요 (Deploy 탭에서 설정)
 
 ## 📱 반응형 디자인
 
@@ -219,6 +203,18 @@ webapp/
 
 ## 🚀 배포 가이드
 
+### 사전 준비
+
+#### 1. GitHub 인증 설정
+1. 샌드박스 인터페이스에서 **#github** 탭 열기
+2. GitHub App 및 OAuth 인증 완료
+3. `setup_github_environment` 도구로 환경 확인
+
+#### 2. Cloudflare API 키 설정
+1. 샌드박스 인터페이스에서 **Deploy** 탭 열기
+2. Cloudflare API 토큰 생성 및 입력
+3. `setup_cloudflare_api_key` 도구로 환경 확인
+
 ### Cloudflare Pages 배포
 
 1. **Cloudflare D1 데이터베이스 생성**
@@ -228,22 +224,47 @@ npx wrangler d1 create webapp-production
 # 출력된 database_id를 wrangler.jsonc에 입력
 ```
 
-2. **프로덕션 마이그레이션**
+2. **wrangler.jsonc 업데이트**
+
+```jsonc
+{
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "webapp-production",
+      "database_id": "<your-database-id-here>"
+    }
+  ]
+}
+```
+
+3. **프로덕션 마이그레이션**
 
 ```bash
 npm run db:migrate:prod
+npm run db:seed  # 옵션: 샘플 데이터 삽입
 ```
 
-3. **Cloudflare Pages 프로젝트 생성**
+4. **Cloudflare Pages 프로젝트 생성**
 
 ```bash
 npx wrangler pages project create webapp --production-branch main
 ```
 
-4. **배포**
+5. **배포**
 
 ```bash
 npm run deploy:prod
+```
+
+### GitHub 푸시
+
+```bash
+# GitHub 환경 설정 완료 후
+git remote add origin https://github.com/<username>/<repo>.git
+git push -f origin main  # 첫 푸시
+# 또는
+git push origin main     # 이후 푸시
 ```
 
 ## 📝 NPM Scripts
