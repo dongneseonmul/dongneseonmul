@@ -199,7 +199,14 @@ app.get('/api/gifts/:id', async (c) => {
     ORDER BY c.created_at DESC
   `).bind(id).all()
   
-  gift.comments = comments.results
+  // Add frontend-compatible fields
+  gift.comments = comments.results.map((c: any) => ({
+    ...c,
+    date: c.created_at?.split(' ')[0] || '',
+    purchases: c.purchase_count || 0,
+    comment: c.content || '',
+    empathy: c.likes || 0
+  }))
   
   // Get group buys
   const groupBuys = await DB.prepare(`
@@ -438,7 +445,14 @@ app.get('/api/together-posts', async (c) => {
     ORDER BY tp.created_at DESC
   `).all()
   
-  return c.json({ posts: toCamelCase(posts.results) })
+  // Add frontend-compatible fields
+  const postsWithFields = posts.results.map((p: any) => ({
+    ...p,
+    time: p.created_at?.split(' ')[1]?.substring(0, 5) || '',
+    date: p.visit_date || '',
+  }))
+  
+  return c.json({ posts: toCamelCase(postsWithFields) })
 })
 
 // Get together post by ID
@@ -469,7 +483,14 @@ app.get('/api/together-posts/:id', async (c) => {
   
   post.applications = applications.results
   
-  return c.json({ post: toCamelCase(post) })
+  // Add frontend-compatible fields
+  const postWithFields = {
+    ...post,
+    time: post.created_at?.split(' ')[1]?.substring(0, 5) || '',
+    date: post.visit_date || '',
+  }
+  
+  return c.json({ post: toCamelCase(postWithFields) })
 })
 
 // Create together post
