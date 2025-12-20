@@ -24,9 +24,11 @@ Hono + Cloudflare Pages + D1 데이터베이스로 구축된 풀스택 웹 애�
 
 ## 🔗 주요 링크
 
+- **프로덕션 (Cloudflare Pages)**: https://dongneseonmul.pages.dev
+- **Preview 배포**: https://a92ead9e.dongneseonmul.pages.dev
+- **GitHub 저장소**: https://github.com/dongneseonmul/dongneseonmul
 - **개발 서버**: https://3000-ijb6lnvhjqs8sh7x574pv-3844e1b6.sandbox.novita.ai
-- **API 엔드포인트**: https://3000-ijb6lnvhjqs8sh7x574pv-3844e1b6.sandbox.novita.ai/api
-- **프로젝트 백업 (API 연동 완료)**: https://www.genspark.ai/api/files/s/W4ryaxbp
+- **API 엔드포인트**: https://dongneseonmul.pages.dev/api
 
 ## 🛠 기술 스택
 
@@ -184,9 +186,19 @@ webapp/
 - **같이가요 게시판**: 게시글 작성, 조회, 신청
 - **마이페이지**: 구매 내역, 내가 쓴/신청한 같이가요, 좋아요 목록
 
-### ⏳ 배포 대기 중
-- **GitHub 연동**: 사용자 인증 필요 (#github 탭에서 설정)
-- **Cloudflare Pages**: API 키 설정 필요 (Deploy 탭에서 설정)
+### ✅ 배포 완료
+- **GitHub 저장소**: https://github.com/dongneseonmul/dongneseonmul
+- **Cloudflare Pages**: https://dongneseonmul.pages.dev
+- **D1 Database ID**: `01e99772-0c26-4723-9c9b-97e3982c5047`
+
+### ⚠️ D1 바인딩 설정 필요
+프론트엔드는 정상 작동하나, API 엔드포인트는 D1 바인딩 설정 후 작동합니다.
+
+1. **Cloudflare Dashboard**: https://dash.cloudflare.com
+2. **Workers & Pages** → **dongneseonmul**
+3. **Settings** → **Functions** → **D1 database bindings**
+4. **Add binding**: Variable name `DB`, Database `webapp-production`
+5. **Save** 클릭 (자동 재배포됨)
 
 ## 📱 반응형 디자인
 
