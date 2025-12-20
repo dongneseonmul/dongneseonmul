@@ -533,7 +533,16 @@ function setupCommentsScrollTrigger() {
     
     if (!trigger || !container || !box) return;
     
-    // 트리거 영역에 마우스가 들어오면 스크롤 활성화
+    // 모바일 터치 감지
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    // 모바일에서는 항상 스크롤 활성화
+    if (isTouchDevice) {
+        container.classList.add('scroll-enabled');
+        return;
+    }
+    
+    // 데스크톱: 트리거 영역에 마우스가 들어오면 스크롤 활성화
     trigger.addEventListener('mouseenter', () => {
         container.classList.add('scroll-enabled');
     });

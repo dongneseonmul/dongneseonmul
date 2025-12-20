@@ -571,16 +571,20 @@ body {
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 8px;
-    pointer-events: none;
+    pointer-events: auto;
+    -webkit-overflow-scrolling: touch; /* iOS smooth scrolling */
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #B0B0B0 #E0E0E0; /* Firefox */
 }
 
 .comments-list-container.scroll-enabled {
     pointer-events: auto;
 }
 
-/* 스크롤바 항상 표시 */
+/* 스크롤바 스타일 (Desktop - Webkit browsers) */
 .comments-list-container::-webkit-scrollbar {
     width: 8px;
+    -webkit-appearance: none; /* iOS override */
 }
 
 .comments-list-container::-webkit-scrollbar-track {
