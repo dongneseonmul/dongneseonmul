@@ -742,40 +742,22 @@ let currentJoiningGroupBuyId = null;
 async function joinGroupBuy(id) {
     if (!checkLoginRequired()) return;
     
+    // 공동구매 ID 저장
     currentJoiningGroupBuyId = id;
     
-    try {
-        // API로 공동구매 참여
-        const response = await fetch(`/api/group-buys/${id}/join`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: currentUser.id })
-        });
-        
-        const result = await response.json();
-        
-        if (!response.ok) {
-            if (result.error === 'Already joined') {
-                alert('이미 참여한 공동구매입니다.');
-            } else {
-                alert(result.error || '공동구매 참여에 실패했습니다.');
-            }
-            return;
-        }
-        
-        if (result.complete) {
-            alert('공동구매가 성공적으로 완료되었습니다!\n\n마이페이지 > 구매 내역에서 방문권을 확인하세요.');
-        } else {
-            alert('공동구매 신청이 완료되었습니다!\n\n모집이 완료되면 알림을 보내드립니다.');
-        }
-        
-        // 상세 페이지 새로고침하여 최신 데이터 표시
-        await showDetail(currentGiftId);
-        
-    } catch (error) {
-        console.error('공동구매 참여 오류:', error);
-        alert('공동구매 참여 중 오류가 발생했습니다.');
-    }
+    // 공동구매 정보 가져오기
+    const gift = sampleGifts.find(g => g.id === currentGiftId);
+    if (!gift || !gift.groupBuys) return;
+    
+    const groupBuy = gift.groupBuys.find(gb => gb.id === id);
+    if (!groupBuy) return;
+    
+    // 모달에 공동구매 정보 설정
+    document.getElementById('groupBuyDiscountRate').textContent = `${groupBuy.discountRate}% 환급`;
+    
+    // 공동구매 모달 열기
+    const modal = document.getElementById('groupBuyModal');
+    modal.classList.add('active');
 }
 
 // 기존 joinGroupBuy 로직을 별도 함수로 분리
@@ -2027,18 +2009,33 @@ async function confirmGroupBuy() {
     closeGroupBuyModal();
     
     try {
-        // 백엔드 API로 공동구매 생성/참여
-        const response = await fetch('/api/group-buys', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                giftId: currentGiftId,
-                userId: currentUser.id,
-                discountRate: gift.discountRate + 5
-            })
-        });
+        let response, result;
         
-        const result = await response.json();
+        // 기존 공동구매 참여 vs 새 공동구매 생성
+        if (currentJoiningGroupBuyId) {
+            // 기존 공동구매 참여
+            response = await fetch(`/api/group-buys/${currentJoiningGroupBuyId}/join`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: currentUser.id })
+            });
+            
+            // ID 초기화
+            currentJoiningGroupBuyId = null;
+        } else {
+            // 새 공동구매 생성
+            response = await fetch('/api/group-buys', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    giftId: currentGiftId,
+                    userId: currentUser.id,
+                    discountRate: gift.discountRate + 5
+                })
+            });
+        }
+        
+        result = await response.json();
         
         if (!response.ok) {
             if (result.error === 'Already joined') {
