@@ -50,17 +50,56 @@ let isLoggedIn = false;
 let userReviews = [];
 
 // 페이지 로드 시 초기화
-document.addEventListener('DOMContentLoaded', function() {
-    // 🔥 동네선물 데이터 복원 (공동구매 포함)
-    restoreSampleGifts();
-    
+document.addEventListener('DOMContentLoaded', async function() {
     // 로그인 상태 복원
     restoreLoginState();
     
+    // API에서 데이터 로드
+    await loadGiftsFromAPI();
+    await loadTogetherPostsFromAPI();
+    
+    // 화면 렌더링
     renderGiftCards();
     renderTogetherCards();
     renderPurchaseHistory();
 });
+
+// API에서 동네선물 데이터 로드
+async function loadGiftsFromAPI() {
+    try {
+        const gifts = await API.getGifts();
+        if (gifts && gifts.length > 0) {
+            // sampleGifts를 API 데이터로 교체
+            sampleGifts.length = 0;
+            sampleGifts.push(...gifts);
+            console.log('✅ API에서 동네선물 데이터 로드:', gifts.length, '개');
+        } else {
+            // API 실패 시 로컬 데이터 복원
+            restoreSampleGifts();
+        }
+    } catch (error) {
+        console.error('❌ 동네선물 데이터 로드 실패:', error);
+        // 폴백: 로컬 데이터 사용
+        restoreSampleGifts();
+    }
+}
+
+// API에서 같이가요 데이터 로드
+async function loadTogetherPostsFromAPI() {
+    try {
+        const posts = await API.getTogetherPosts();
+        if (posts && posts.length > 0) {
+            // togetherPosts를 API 데이터로 교체
+            togetherPosts.length = 0;
+            togetherPosts.push(...posts);
+            console.log('✅ API에서 같이가요 데이터 로드:', posts.length, '개');
+        } else {
+            console.log('⚠️ 같이가요 데이터 없음');
+        }
+    } catch (error) {
+        console.error('❌ 같이가요 데이터 로드 실패:', error);
+    }
+}
 
 // 경험선물 카드 렌더링
 function renderGiftCards() {
@@ -274,9 +313,13 @@ function moveSlide(id, totalImages, direction) {
 }
 
 // 상세 페이지 표시
-function showDetail(giftId) {
-    const gift = sampleGifts.find(g => g.id === giftId);
-    if (!gift) return;
+async function showDetail(giftId) {
+    // API에서 최신 데이터 가져오기
+    const gift = await API.getGiftById(giftId);
+    if (!gift) {
+        alert('상품 정보를 불러올 수 없습니다.');
+        return;
+    }
     
     currentGiftId = giftId;
     
@@ -1047,23 +1090,34 @@ function formatPrice(price) {
     return price.toLocaleString('ko-KR') + '원';
 }
 
-function toggleLike(id) {
+async function toggleLike(id) {
     // 로그인 체크
     if (!checkLoginRequired()) return;
     
     const gift = sampleGifts.find(g => g.id === id);
     if (!gift) return;
     
+    // API 호출
+    const result = await API.toggleGiftLike(id, currentUser.id);
+    if (!result.success) {
+        alert('좋아요 처리 중 오류가 발생했습니다.');
+        return;
+    }
+    
     const likeIndex = userLikes.gifts.indexOf(id);
     
-    if (likeIndex > -1) {
-        // 이미 좋아요한 경우 - 취소
-        userLikes.gifts.splice(likeIndex, 1);
-        gift.likes = Math.max(0, gift.likes - 1);
-    } else {
+    if (result.liked) {
         // 좋아요 추가
-        userLikes.gifts.push(id);
+        if (likeIndex === -1) {
+            userLikes.gifts.push(id);
+        }
         gift.likes = (gift.likes || 0) + 1;
+    } else {
+        // 좋아요 취소
+        if (likeIndex > -1) {
+            userLikes.gifts.splice(likeIndex, 1);
+        }
+        gift.likes = Math.max(0, gift.likes - 1);
     }
     
     // 좋아요 데이터 저장
