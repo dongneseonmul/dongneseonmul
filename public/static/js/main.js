@@ -321,6 +321,12 @@ async function showDetail(giftId) {
         return;
     }
     
+    // sampleGifts도 업데이트 (groupBuys 정보 동기화)
+    const sampleGiftIndex = sampleGifts.findIndex(g => g.id === giftId);
+    if (sampleGiftIndex !== -1) {
+        sampleGifts[sampleGiftIndex] = { ...sampleGifts[sampleGiftIndex], ...gift };
+    }
+    
     currentGiftId = giftId;
     
     // 이전 페이지 추적
