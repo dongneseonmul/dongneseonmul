@@ -395,7 +395,66 @@ app.post('/api/group-buys', async (c) => {
     return c.json({ error: 'User ID required' }, 400)
   }
   
-  // Create group buy with 24 hour expiry
+  // Check if there's an incomplete group buy for this gift
+  const existingGroupBuy = await DB.prepare(`
+    SELECT * FROM group_buys 
+    WHERE gift_id = ? AND is_complete = 0 
+    ORDER BY created_at ASC 
+    LIMIT 1
+  `).bind(giftId).first()
+  
+  if (existingGroupBuy) {
+    // Join existing group buy instead of creating new one
+    // Check if user already joined
+    const alreadyJoined = await DB.prepare(`
+      SELECT * FROM group_buy_participants 
+      WHERE group_buy_id = ? AND user_id = ?
+    `).bind(existingGroupBuy.id, userId).first()
+    
+    if (alreadyJoined) {
+      return c.json({ error: 'Already joined' }, 400)
+    }
+    
+    // Add participant
+    await DB.prepare('INSERT INTO group_buy_participants (group_buy_id, user_id) VALUES (?, ?)')
+      .bind(existingGroupBuy.id, userId)
+      .run()
+    
+    // Check if we've reached target count
+    const count = await DB.prepare('SELECT COUNT(*) as count FROM group_buy_participants WHERE group_buy_id = ?')
+      .bind(existingGroupBuy.id)
+      .first()
+    
+    if (count && count.count >= existingGroupBuy.target_count) {
+      // Mark as complete
+      await DB.prepare('UPDATE group_buys SET is_complete = 1 WHERE id = ?')
+        .bind(existingGroupBuy.id)
+        .run()
+      
+      // Create purchase records for all participants
+      const participants = await DB.prepare('SELECT user_id FROM group_buy_participants WHERE group_buy_id = ?')
+        .bind(existingGroupBuy.id)
+        .all()
+      
+      const gift = await DB.prepare('SELECT * FROM gifts WHERE id = ?').bind(giftId).first()
+      
+      for (const p of participants.results) {
+        const voucherCode = generateVoucherCode()
+        const expiryDate = getExpiryDate()
+        
+        await DB.prepare(`
+          INSERT INTO purchases (user_id, gift_id, quantity, voucher_code, expiry_date)
+          VALUES (?, ?, ?, ?, ?)
+        `).bind(p.user_id, giftId, 1, voucherCode, expiryDate).run()
+      }
+      
+      return c.json({ success: true, groupBuyId: existingGroupBuy.id, complete: true })
+    }
+    
+    return c.json({ success: true, groupBuyId: existingGroupBuy.id, complete: false })
+  }
+  
+  // Create new group buy (only if no existing incomplete one)
   const endTime = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
   
   const result = await DB.prepare(`
