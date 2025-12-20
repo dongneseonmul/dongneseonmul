@@ -2645,7 +2645,7 @@ function requestVerification() {
 }
 
 // 인증 확인
-function confirmVerification() {
+async function confirmVerification() {
     const inputCode = document.getElementById('authCode').value.trim();
     
     if (!inputCode) {
@@ -2661,7 +2661,7 @@ function confirmVerification() {
     // 인증번호 확인
     if (inputCode === pendingVerification.code) {
         // 인증 성공
-        processLogin(pendingVerification.phoneNumber, pendingVerification.nickname);
+        await processLogin(pendingVerification.phoneNumber, pendingVerification.nickname);
     } else {
         alert('인증번호가 일치하지 않습니다.');
     }
@@ -2711,8 +2711,6 @@ async function processLogin(phoneNumber, nickname) {
             };
         }
         
-        const phoneKey = phoneNumber.replace(/-/g, '');
-    
         // 사용자의 좋아요 데이터 로드
         if (userLikesDatabase[phoneKey]) {
             userLikes.gifts = [...userLikesDatabase[phoneKey].gifts];
