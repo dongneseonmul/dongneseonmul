@@ -1985,92 +1985,52 @@ function closeGroupBuyModal() {
     modal.classList.remove('active');
 }
 
-function confirmGroupBuy() {
+async function confirmGroupBuy() {
+    if (!currentUser || !currentUser.id) {
+        alert('로그인이 필요합니다.');
+        return;
+    }
+    
     const gift = sampleGifts.find(g => g.id === currentGiftId);
     if (!gift) return;
     
-    // 공동구매 목록 초기화
-    if (!gift.groupBuys) {
-        gift.groupBuys = [];
-    }
+    closeGroupBuyModal();
     
-    // 1명만 있는(미완료) 공동구매 찾기
-    const availableGroupBuy = gift.groupBuys.find(gb => 
-        !gb.isComplete && gb.users.length === 1
-    );
-    
-    if (availableGroupBuy) {
-        // 기존 공동구매에 참여
-        if (!confirm('진행 중인 공동구매에 참여하시겠습니까?\n\n바로 공동구매가 성사되어 결제가 진행됩니다.')) {
-            return;
-        }
-        
-        // 사용자 추가
-        availableGroupBuy.users.push({ 
-            initial: "나", 
-            color: "#6C8FD9" 
+    try {
+        // 백엔드 API로 공동구매 생성/참여
+        const response = await fetch('/api/group-buys', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                giftId: currentGiftId,
+                userId: currentUser.id,
+                discountRate: gift.discountRate + 5
+            })
         });
         
-        // 공동구매 완료 처리
-        availableGroupBuy.isComplete = true;
-        availableGroupBuy.endTime = null;
+        const result = await response.json();
         
-        // 구매 내역에 추가 (공동구매)
-        addToPurchaseHistory(gift, 1, true, availableGroupBuy.discountRate);
-        
-        // 🔥 localStorage에 저장
-        saveSampleGifts();
-        
-        // 화면 업데이트
-        renderGroupBuyCards(gift.groupBuys);
-        
-        // 모달 먼저 닫기
-        closeGroupBuyModal();
-        
-        // 공동구매 성사 팝업 표시 (약간의 딜레이 후)
-        setTimeout(() => {
-            alert('🎉 공동구매 성사!\n\n2명이 모두 모집되었습니다.\n구매 내역에서 확인하실 수 있습니다.');
-        }, 300);
-        
-    } else {
-        // 새로운 공동구매 생성
-        if (!confirm('공동구매를 신청하시겠습니까?\n\n24시간 이내 함께 구매할 사람이 모집되면 자동으로 결제가 진행됩니다.')) {
+        if (!response.ok) {
+            if (result.error === 'Already joined') {
+                alert('이미 참여한 공동구매입니다.');
+            } else {
+                alert(result.error || '공동구매 생성/참여에 실패했습니다.');
+            }
             return;
         }
         
-        const newGroupBuy = {
-            id: Date.now(),
-            createdAt: new Date().toLocaleString('ko-KR', { 
-                year: 'numeric', 
-                month: '2-digit', 
-                day: '2-digit', 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            }).replace(/\. /g, '-').replace('.', ''),
-            discountRate: gift.groupBuys && gift.groupBuys.length > 0 
-                ? gift.groupBuys[0].discountRate 
-                : gift.discountRate + 5,
-            users: [
-                { initial: "나", color: "#4A90E2" }
-            ],
-            isComplete: false,
-            endTime: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24시간 후
-        };
+        if (result.complete) {
+            alert('공동구매가 성공적으로 완료되었습니다!\n\n마이페이지 > 구매 내역에서 방문권을 확인하세요.');
+        } else {
+            alert('공동구매 신청이 완료되었습니다!\n\n다른 사용자가 참여하면 알림을 보내드립니다.');
+        }
         
-        // 공동구매 목록에 추가
-        gift.groupBuys.unshift(newGroupBuy);
+        // 상세 페이지 새로고침하여 최신 데이터 표시
+        await showDetail(currentGiftId);
         
-        // 🔥 localStorage에 저장
-        saveSampleGifts();
-        
-        // 화면 업데이트
-        renderGroupBuyCards(gift.groupBuys);
-        
-        // 카운트다운 시작
-        startCountdowns();
-        
-        alert('공동구매 신청이 완료되었습니다!\n\n24시간 이내 함께 구매할 사람이 모집되면 알림을 보내드립니다.');
-        closeGroupBuyModal();
+    } catch (error) {
+        console.error('공동구매 생성/참여 오류:', error);
+        alert('공동구매 생성/참여 중 오류가 발생했습니다.');
     }
 }
 
