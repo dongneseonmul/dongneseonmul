@@ -732,23 +732,43 @@ function startCountdowns() {
 // 공동구매 카드에서 신청 버튼 클릭 시
 let currentJoiningGroupBuyId = null;
 
-function joinGroupBuy(id) {
+async function joinGroupBuy(id) {
+    if (!checkLoginRequired()) return;
+    
     currentJoiningGroupBuyId = id;
     
-    const gift = sampleGifts.find(g => g.id === currentGiftId);
-    if (!gift || !gift.groupBuys) return;
-    
-    const groupBuy = gift.groupBuys.find(gb => gb.id === id);
-    if (!groupBuy) return;
-    
-    // 이미 완료된 공동구매인지 확인
-    if (groupBuy.isComplete) {
-        alert('이미 완료된 공동구매입니다.');
-        return;
+    try {
+        // API로 공동구매 참여
+        const response = await fetch(`/api/group-buys/${id}/join`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: currentUser.id })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+            if (result.error === 'Already joined') {
+                alert('이미 참여한 공동구매입니다.');
+            } else {
+                alert(result.error || '공동구매 참여에 실패했습니다.');
+            }
+            return;
+        }
+        
+        if (result.complete) {
+            alert('공동구매가 성공적으로 완료되었습니다!\n\n마이페이지 > 구매 내역에서 방문권을 확인하세요.');
+        } else {
+            alert('공동구매 신청이 완료되었습니다!\n\n모집이 완료되면 알림을 보내드립니다.');
+        }
+        
+        // 상세 페이지 새로고침하여 최신 데이터 표시
+        await showDetail(currentGiftId);
+        
+    } catch (error) {
+        console.error('공동구매 참여 오류:', error);
+        alert('공동구매 참여 중 오류가 발생했습니다.');
     }
-    
-    // 공동구매 모달 열기 (상단 +신청하기와 동일)
-    createGroupBuy();
 }
 
 // 기존 joinGroupBuy 로직을 별도 함수로 분리

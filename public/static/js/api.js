@@ -78,7 +78,13 @@ const API = {
 
   async getGiftById(id) {
     try {
-      const response = await fetch(`${API_BASE_URL}/gifts/${id}`);
+      const response = await fetch(`${API_BASE_URL}/gifts/${id}`, {
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
       const data = await response.json();
       return data.gift || null;
     } catch (error) {
