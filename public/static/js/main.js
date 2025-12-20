@@ -1107,9 +1107,50 @@ function navigateToMyPage() {
 }
 
 // 구매 내역으로 이동
-function navigateToPurchaseHistory() {
+async function navigateToPurchaseHistory() {
     document.getElementById('myPage').classList.remove('active');
     document.getElementById('purchaseHistoryPage').classList.add('active');
+    
+    // 백엔드 API에서 구매 내역 로드
+    if (currentUser && currentUser.id) {
+        try {
+            const response = await fetch(`/api/purchases/${currentUser.id}`);
+            const data = await response.json();
+            
+            if (data.purchases && data.purchases.length > 0) {
+                // 백엔드 데이터를 프론트엔드 형식으로 변환
+                purchaseHistory = data.purchases.map(p => ({
+                    giftId: p.giftId,
+                    storeName: p.storeName,
+                    storeIntro: p.storeIntro,
+                    productName: p.productName,
+                    originalPrice: p.originalPrice,
+                    discountRate: p.discountRate,
+                    discountedPrice: p.discountedPrice,
+                    location: p.location,
+                    image: p.image,
+                    voucherCode: p.voucherCode,
+                    expiryDate: p.expiryDate,
+                    hasReview: p.hasReview,
+                    hasReceipt: p.hasReceipt,
+                    isRefunded: p.isRefunded,
+                    purchaseDate: p.createdAt
+                }));
+                
+                console.log('✅ 구매 내역 로드됨:', purchaseHistory.length, '건');
+                
+                // localStorage에 저장
+                const phoneKey = currentUser.phoneNumber.replace(/-/g, '');
+                localStorage.setItem('purchaseHistory_' + phoneKey, JSON.stringify(purchaseHistory));
+            }
+        } catch (error) {
+            console.error('❌ 구매 내역 로드 실패:', error);
+        }
+    }
+    
+    // 화면 렌더링
+    renderPurchaseHistory();
+    
     window.scrollTo(0, 0);
 }
 
