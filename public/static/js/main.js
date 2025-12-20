@@ -1029,9 +1029,14 @@ function updatePaymentButton() {
 }
 
 // 결제 처리
-function processPayment() {
+async function processPayment() {
     if (selectedEmpathy === null) {
         alert('공감 표시를 해주세요!');
+        return;
+    }
+    
+    if (!currentUser || !currentUser.id) {
+        alert('로그인이 필요합니다.');
         return;
     }
     
@@ -1040,11 +1045,35 @@ function processPayment() {
     
     const quantity = parseInt(document.getElementById('quantity').value);
     
-    // 구매 내역에 추가
-    addToPurchaseHistory(gift, quantity, false);
-    
-    alert(`결제가 완료되었습니다! (${quantity}장)\n\n마이페이지 > 구매 내역에서 확인하실 수 있습니다.`);
-    closePurchaseModal();
+    try {
+        // 백엔드 API로 구매 내역 생성
+        const response = await fetch('/api/purchases', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUser.id,
+                giftId: currentGiftId,
+                quantity: quantity
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+            alert(result.error || '결제 처리에 실패했습니다.');
+            return;
+        }
+        
+        alert(`결제가 완료되었습니다! (${quantity}장)\n\n마이페이지 > 구매 내역에서 확인하실 수 있습니다.`);
+        closePurchaseModal();
+        
+        // 로컬 구매 내역도 업데이트 (선택사항)
+        addToPurchaseHistory(gift, quantity, false);
+        
+    } catch (error) {
+        console.error('결제 처리 오류:', error);
+        alert('결제 처리 중 오류가 발생했습니다.');
+    }
 }
 
 // 네비게이션
