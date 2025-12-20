@@ -516,21 +516,13 @@ function renderCommentsInDetail(comments) {
     
     container.innerHTML = '';
     
-    // 현재 상품의 사용자 후기 가져오기
-    const gift = sampleGifts.find(g => g.id === currentGiftId);
-    const userCommentsForThisGift = userReviews.filter(r => r.giftId === gift.id);
-    
-    // 사용자 후기를 먼저 추가 (최신순)
-    userCommentsForThisGift.forEach((comment) => {
-        const commentItem = createCommentElement(comment, false);
-        container.appendChild(commentItem);
-    });
-    
-    // 기존 코멘트 추가
+    // API에서 받은 모든 후기 표시 (백엔드에서 이미 최신순 정렬됨)
     comments.forEach((comment) => {
         const commentItem = createCommentElement(comment, false);
         container.appendChild(commentItem);
     });
+    
+    console.log('✅ 후기 렌더링 완료:', comments.length, '개');
 }
 
 // 코멘트 박스 스크롤 트리거 설정
@@ -2331,7 +2323,7 @@ function closeReviewModal() {
     currentVoucherCode = null;
 }
 
-function submitReview() {
+async function submitReview() {
     const reviewText = document.getElementById('reviewText').value.trim();
     const submitBtn = document.querySelector('.submit-review-button');
     
@@ -2360,42 +2352,48 @@ function submitReview() {
             return;
         }
         
-        // 새 후기 객체 생성
-        const newReview = {
-            giftId: purchase.giftId, // 🔥 올바른 giftId 사용!
-            nickname: currentUser ? currentUser.nickname : "여행좋아",
-            date: new Date().toISOString().split('T')[0],
-            purchases: 1,
-            comment: reviewText,
-            empathy: 0,
-            isNew: true
-        };
-        
-        // 후기 목록에 추가 (최신이 앞에)
-        userReviews.unshift(newReview);
-        
-        // localStorage에 저장
-        const phoneKey = currentUser ? currentUser.phoneNumber.replace(/-/g, '') : 'default';
-        const savedReviews = JSON.parse(localStorage.getItem('userReviews_' + phoneKey) || '[]');
-        savedReviews.unshift(newReview);
-        localStorage.setItem('userReviews_' + phoneKey, JSON.stringify(savedReviews));
-        console.log('✅ localStorage에 저장됨:', savedReviews.length, '개 후기');
-        
-        // 상세 페이지가 열려있다면 즉시 업데이트
-        if (document.getElementById('detailPage').classList.contains('active') && currentGiftId === purchase.id) {
-            renderCommentsInDetail(gift.comments);
-            console.log('✅ 상세 페이지 후기 즉시 업데이트');
-        }
-        
-        // 🔥 구매 내역에 후기 작성 여부 표시
-        purchase.reviewWritten = true;
-        purchase.reviewText = reviewText;
-        
-        // 🔥 localStorage에 구매 내역 업데이트
-        if (currentUser) {
-            const phoneKey = currentUser.phoneNumber.replace(/-/g, '');
-            localStorage.setItem('purchaseHistory_' + phoneKey, JSON.stringify(purchaseHistory));
-            console.log('✅ 구매 내역 업데이트됨 (후기 작성 완료)');
+        // 백엔드 API로 후기 작성
+        try {
+            const response = await fetch('/api/comments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    giftId: purchase.giftId,
+                    userId: currentUser.id,
+                    content: reviewText
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (!response.ok) {
+                alert(result.error || '후기 등록에 실패했습니다.');
+                return;
+            }
+            
+            console.log('✅ 후기가 백엔드에 저장됨:', result.comment);
+            
+            // 🔥 구매 내역에 후기 작성 여부 표시
+            purchase.reviewWritten = true;
+            purchase.reviewText = reviewText;
+            
+            // 🔥 localStorage에 구매 내역 업데이트
+            if (currentUser) {
+                const phoneKey = currentUser.phoneNumber.replace(/-/g, '');
+                localStorage.setItem('purchaseHistory_' + phoneKey, JSON.stringify(purchaseHistory));
+                console.log('✅ 구매 내역 업데이트됨 (후기 작성 완료)');
+            }
+            
+            // 상세 페이지가 열려있다면 데이터 새로고침
+            if (document.getElementById('detailPage').classList.contains('active') && currentGiftId === purchase.giftId) {
+                await showDetail(currentGiftId);
+                console.log('✅ 상세 페이지 후기 새로고침');
+            }
+            
+        } catch (error) {
+            console.error('후기 등록 오류:', error);
+            alert('후기 등록 중 오류가 발생했습니다.');
+            return;
         }
     }
     
