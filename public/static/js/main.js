@@ -136,7 +136,7 @@ function createGiftCard(gift) {
         const groupBuyRate = gift.groupBuys && gift.groupBuys.length > 0 
             ? gift.groupBuys[0].discountRate 
             : gift.discountRate + 5;
-        refundText = `${gift.discountRate}%~${groupBuyRate}% 환급`;
+        refundText = `${gift.discountRate}~${groupBuyRate}% 환급`;
     }
     
     cardInfo.innerHTML = `
