@@ -5,7 +5,12 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [
-    build(),
+    build({
+      outputDir: './dist',
+      entry: 'src/index.tsx',
+      // Only route /api/* to the worker, everything else is static
+      minify: true
+    }),
     devServer({
       adapter,
       entry: 'src/index.tsx'

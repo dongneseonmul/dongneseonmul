@@ -659,13 +659,9 @@ app.patch('/api/purchases/:id/receipt', async (c) => {
 })
 
 // ============================================
-// Root route - redirect to index.html
+// Root route - let Cloudflare Pages serve index.html
 // ============================================
 
-app.get('/', (c) => {
-  // In Cloudflare Pages, index.html is served automatically
-  // For local development, redirect to index.html
-  return c.redirect('/index.html')
-})
+// Remove the root route handler - let Cloudflare Pages serve static files
 
 export default app
