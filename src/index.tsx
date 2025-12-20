@@ -257,6 +257,26 @@ app.get('/api/gifts/:id', async (c) => {
   return c.json({ gift: toCamelCase(gift) })
 })
 
+// Debug API: Check group buys raw data
+app.get('/api/debug/gift/:id/groupbuys', async (c) => {
+  const id = c.req.param('id')
+  const { DB } = c.env
+  
+  const groupBuys = await DB.prepare(`
+    SELECT gb.*
+    FROM group_buys gb
+    WHERE gb.gift_id = ?
+    ORDER BY gb.is_complete ASC, gb.created_at DESC
+    LIMIT 5
+  `).bind(id).all()
+  
+  return c.json({ 
+    giftId: id,
+    count: groupBuys.results.length,
+    groupBuys: groupBuys.results 
+  })
+})
+
 // Toggle gift like
 app.post('/api/gifts/:id/like', async (c) => {
   const id = c.req.param('id')
