@@ -52,7 +52,7 @@ let userReviews = [];
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', async function() {
     // 로그인 상태 복원
-    restoreLoginState();
+    await restoreLoginState();
     
     // API에서 데이터 로드
     await loadGiftsFromAPI();
@@ -2408,10 +2408,33 @@ function submitReceipt() {
 let pendingVerification = null; // { phoneNumber, code, nickname }
 
 // 로그인 상태 복원
-function restoreLoginState() {
+async function restoreLoginState() {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
         currentUser = JSON.parse(savedUser);
+        
+        // id가 없는 경우 백엔드에서 다시 가져오기
+        if (!currentUser.id && currentUser.phoneNumber && currentUser.nickname) {
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        phoneNumber: currentUser.phoneNumber, 
+                        nickname: currentUser.nickname 
+                    })
+                });
+                const result = await response.json();
+                if (result.success && result.user) {
+                    currentUser.id = result.user.id;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    console.log('✅ 사용자 ID 복원됨:', currentUser.id);
+                }
+            } catch (error) {
+                console.error('사용자 ID 복원 실패:', error);
+            }
+        }
+        
         isLoggedIn = true;
         
         // 사용자의 좋아요 데이터 로드
