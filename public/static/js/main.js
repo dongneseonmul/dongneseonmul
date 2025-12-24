@@ -1849,15 +1849,15 @@ function navigateToMyTogether() {
     document.getElementById('myPage').classList.remove('active');
     document.getElementById('myTogetherPage').classList.add('active');
     
-    // 🔥 내가 쓴 게시글 렌더링 (전화번호로 필터링)
-    const myPosts = currentUser 
-        ? togetherPosts.filter(p => p.phoneNumber === currentUser.phoneNumber)
+    // 🔥 내가 쓴 게시글 렌더링 (userId로 필터링)
+    const myPosts = currentUser && currentUser.id
+        ? togetherPosts.filter(p => p.userId === currentUser.id)
         : [];
     
     const container = document.getElementById('myTogetherCards');
     container.innerHTML = '';
     
-    console.log('✅ 내가 쓴 같이가요:', myPosts.length, '개');
+    console.log('✅ 내가 쓴 같이가요:', myPosts.length, '개 (userId:', currentUser?.id, ')');
     
     if (myPosts.length === 0) {
         container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">작성한 같이가요 게시글이 없습니다.</p>';
@@ -2220,7 +2220,7 @@ function closeTogetherWriteModal() {
 }
 
 // 같이가요 포스트 등록
-function submitTogetherPost() {
+async function submitTogetherPost() {
     const title = document.getElementById('togetherTitle').value.trim();
     const content = document.getElementById('togetherContent').value.trim();
     const storeName = document.getElementById('togetherStore').value.trim();
@@ -2279,62 +2279,58 @@ function submitTogetherPost() {
         return;
     }
     
+    // 로그인 체크
+    if (!currentUser || !currentUser.id) {
+        alert('로그인이 필요합니다.');
+        return;
+    }
+    
     // 현재 선물과 연관된 가게 찾기
     const relatedGift = sampleGifts.find(g => g.storeName === storeName);
     const storeAddress = relatedGift ? relatedGift.location : '주소 정보 없음';
     
-    // 새 포스트 생성
-    const newPost = {
-        id: Date.now(),
-        nickname: currentUser ? currentUser.nickname : '익명',
-        phoneNumber: currentUser ? currentUser.phoneNumber : '', // 🔥 작성자 전화번호 저장
-        time: "방금 전",
-        title: title,
-        content: content,
-        date: date,
-        time: time,
-        people: people,
-        storeName: storeName,
-        storeAddress: storeAddress,
-        question: question,
-        authorInfo: {
-            gender: gender,
-            age: age,
-            job: job,
-            intro: intro
-        },
-        likes: 0
-    };
-    
-    // 전체 같이가요 목록에 추가
-    togetherPosts.unshift(newPost);
-    
-    // 참여자 목록 초기화
-    togetherApplications[newPost.id] = {
-        confirmed: [],
-        pending: []
-    };
-    
-    // 현재 보고 있는 상품의 같이가요에도 추가 (연관 가게인 경우)
-    if (currentGiftId && relatedGift && relatedGift.id === currentGiftId) {
-        if (!relatedGift.togetherPosts) {
-            relatedGift.togetherPosts = [];
-        }
-        relatedGift.togetherPosts.unshift(newPost);
+    try {
+        // 백엔드 API로 같이가요 게시글 생성
+        const response = await fetch('/api/together-posts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUser.id,
+                title: title,
+                content: content,
+                visitDate: date,
+                visitTime: time,
+                people: people,
+                storeName: storeName,
+                storeAddress: storeAddress,
+                question: question,
+                gender: gender,
+                age: age,
+                job: job,
+                intro: intro
+            })
+        });
         
-        // 상세 페이지의 같이가요 카드 업데이트
-        renderTogetherCardsInDetail(relatedGift.togetherPosts);
+        const result = await response.json();
+        
+        if (!response.ok) {
+            alert(result.error || '같이가요 등록에 실패했습니다.');
+            return;
+        }
+        
+        console.log('✅ 같이가요 게시글이 백엔드에 저장됨:', result.postId);
+        
+        // 같이가요 목록 새로고침
+        await loadTogetherPostsFromAPI();
+        renderTogetherCards();
+        
+        alert('같이가요 게시글이 등록되었습니다!');
+        closeTogetherWriteModal();
+        
+    } catch (error) {
+        console.error('같이가요 등록 오류:', error);
+        alert('같이가요 등록 중 오류가 발생했습니다.');
     }
-    
-    // 같이가요 메인 화면 업데이트
-    renderTogetherCards();
-    
-    // 🔥 localStorage에 전체 같이가요 목록 저장
-    localStorage.setItem('togetherPosts', JSON.stringify(togetherPosts));
-    console.log('✅ 같이가요 목록 저장됨:', togetherPosts.length, '개');
-    
-    alert('같이가요 게시글이 등록되었습니다!');
-    closeTogetherWriteModal();
 }
 
 function writeReview(code) {
