@@ -2125,10 +2125,8 @@ function createGroupBuy() {
     
     const modal = document.getElementById('groupBuyModal');
     
-    // 공동구매 정보 설정
-    const groupBuyDiscount = gift.groupBuys && gift.groupBuys.length > 0 
-        ? gift.groupBuys[0].discountRate 
-        : gift.discountRate + 5; // 기본 할인율 + 5%
+    // 공동구매 정보 설정 - gift의 공동구매 환급률 사용
+    const groupBuyDiscount = gift.discountRate;
     
     document.getElementById('groupBuyDiscountRate').textContent = `${groupBuyDiscount}% 환급`;
     
