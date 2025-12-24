@@ -104,10 +104,10 @@
 
                 <section class="group-buy-section">
                     <div class="section-header-with-button">
-                        <h3 class="section-title">공동구매</h3>
+                        <h3 class="section-title">같이사요</h3>
                         <button class="section-action-button" onclick="createGroupBuy()">신청하기</button>
                     </div>
-                    <p class="section-subtitle">2명씩 공동구매로 더 많이 환급 받을 수 있어요</p>
+                    <p class="section-subtitle" id="groupBuySubtitle">공동구매로 N% 환급 받으세요</p>
                     <div id="detailGroupBuyCards" class="group-buy-cards">
                         <!-- 공동구매 카드들이 동적으로 추가됩니다 -->
                     </div>
@@ -149,8 +149,8 @@
 
         <div class="fixed-purchase-bar">
             <button class="purchase-button" onclick="createGroupBuy()">
-                <span class="purchase-text">같이사기</span>
-                <span class="purchase-subtext">공동구매로 더 저렴하게 구매하세요</span>
+                <span class="purchase-text">같이사요</span>
+                <span class="purchase-subtext" id="purchaseSubtext">공동구매로 N% 환급 받으세요</span>
             </button>
         </div>
     </div>
@@ -300,7 +300,7 @@
                 <i class="fas fa-times"></i>
             </button>
 
-            <h2 class="modal-title">공동구매 신청</h2>
+            <h2 class="modal-title">같이사요 신청</h2>
 
             <div class="group-buy-form">
                 <div class="group-buy-info-box">
@@ -320,7 +320,7 @@
                 </div>
 
                 <button class="create-group-buy-button" onclick="confirmGroupBuy()">
-                    공동구매 신청하기
+                    같이사요 신청하기
                 </button>
             </div>
         </div>

@@ -352,9 +352,22 @@ async function showDetail(giftId) {
     const priceText = `${formatPrice(gift.discountedPrice)}`;
     document.getElementById('detailPrice').textContent = priceText;
     
-    // 환급률 - 기본 구매 환급률만 표시 (공동구매 환급률은 공동구매 섹션에서 표시)
-    const refundRateText = `${gift.discountRate}% 환급`;
+    // 환급률 - 공동구매 환급률 표시 (기본 환급률 + 5%)
+    const groupBuyDiscountRate = gift.discountRate + 5;
+    const refundRateText = `${groupBuyDiscountRate}% 환급`;
     document.getElementById('detailRefundRate').textContent = refundRateText;
+    
+    // 같이사요 섹션 서브타이틀 업데이트
+    const groupBuySubtitle = document.getElementById('groupBuySubtitle');
+    if (groupBuySubtitle) {
+        groupBuySubtitle.textContent = `공동구매로 ${groupBuyDiscountRate}% 환급 받으세요`;
+    }
+    
+    // 하단 '같이사요' 버튼 서브텍스트 업데이트
+    const purchaseSubtext = document.getElementById('purchaseSubtext');
+    if (purchaseSubtext) {
+        purchaseSubtext.textContent = `공동구매로 ${groupBuyDiscountRate}% 환급 받으세요`;
+    }
     
     document.getElementById('detailDescription').textContent = gift.description;
     document.getElementById('detailStoreName').textContent = gift.storeName;
