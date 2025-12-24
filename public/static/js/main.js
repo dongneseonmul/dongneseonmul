@@ -1296,22 +1296,6 @@ async function shareGift() {
         }
     }
 }
-        console.log('✅ 좋아요 데이터 저장됨');
-    }
-    
-    // 카드 UI 업데이트
-    renderGiftCards();
-    
-    // 내 좋아요 화면이 열려있다면 업데이트
-    if (document.getElementById('myLikesPage').classList.contains('active')) {
-        renderLikedGifts();
-    }
-    
-    // 상세 화면이 열려있다면 업데이트
-    if (currentGiftId === id && document.getElementById('detailPage').classList.contains('active')) {
-        showDetail(id);
-    }
-}
 
 function toggleTogetherLike(id) {
     // 로그인 체크
@@ -2036,10 +2020,6 @@ function renderLikedTogether() {
         const card = createTogetherCard(post);
         container.appendChild(card);
     });
-}
-
-function shareGift(id) {
-    alert('공유하기 기능 (미구현)');
 }
 
 function giftVoucher(code) {
