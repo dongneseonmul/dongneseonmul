@@ -375,6 +375,7 @@ async function showDetail(giftId) {
     
     // 같이가요 카드 렌더링
     console.log('🔍 같이가요 데이터:', gift.togetherPosts);
+    renderTogetherWaitlist(gift.togetherPosts || []);
     renderTogetherCardsInDetail(gift.togetherPosts || []);
     
     // 좋아요 버튼 상태 업데이트
@@ -791,6 +792,97 @@ function processJoinGroupBuy(id) {
     } else {
         alert('공동구매 신청이 완료되었습니다!\n\n모집이 완료되면 알림을 보내드립니다.');
         startCountdowns();
+    }
+}
+
+// 같이가요 대기열 렌더링
+function renderTogetherWaitlist(posts) {
+    const avatarsContainer = document.getElementById('detailWaitlistAvatars');
+    const waitlistText = document.getElementById('detailWaitlistText');
+    
+    if (!avatarsContainer || !waitlistText) return;
+    
+    avatarsContainer.innerHTML = '';
+    
+    // 고유한 사용자 수 계산 (게시글 작성자들)
+    const uniqueUsers = new Set();
+    if (posts && Array.isArray(posts)) {
+        posts.forEach(post => {
+            if (post.userId) {
+                uniqueUsers.add(post.userId);
+            }
+        });
+    }
+    
+    const userCount = uniqueUsers.size;
+    
+    // 최대 3개의 아바타 표시
+    const displayCount = Math.min(userCount, 3);
+    const colors = [
+        'linear-gradient(135deg, #FF6B6B, #FF8E53)',
+        'linear-gradient(135deg, #4ECDC4, #44A08D)',
+        'linear-gradient(135deg, #A8E6CF, #56AB91)',
+        'linear-gradient(135deg, #FFD93D, #F7B731)',
+        'linear-gradient(135deg, #6C5CE7, #A29BFE)'
+    ];
+    
+    for (let i = 0; i < displayCount; i++) {
+        const avatar = document.createElement('div');
+        avatar.className = 'waitlist-avatar';
+        avatar.style.background = colors[i % colors.length];
+        avatar.textContent = String.fromCharCode(65 + i); // A, B, C
+        avatarsContainer.appendChild(avatar);
+    }
+    
+    // 더 많은 사용자가 있으면 ... 표시
+    if (userCount > 3) {
+        const more = document.createElement('div');
+        more.className = 'waitlist-more';
+        more.textContent = '...';
+        avatarsContainer.appendChild(more);
+    }
+    
+    // 텍스트 업데이트
+    waitlistText.textContent = `${userCount}명이 이곳을 가고 싶어해요`;
+}
+
+// 알림 토글
+function toggleNotification() {
+    if (!checkLoginRequired()) return;
+    
+    const button = document.getElementById('detailNotifyButton');
+    if (!button) return;
+    
+    const isActive = button.classList.toggle('active');
+    
+    if (isActive) {
+        // 알림 활성화
+        const icon = button.querySelector('i');
+        const text = button.querySelector('span');
+        icon.classList.remove('far');
+        icon.classList.add('fas');
+        text.textContent = '알림 받는 중';
+        
+        // 로컬 스토리지에 저장
+        if (currentUser && currentGiftId) {
+            const key = `notification_${currentUser.id}_${currentGiftId}`;
+            localStorage.setItem(key, 'true');
+        }
+        
+        alert('모임이 생기면 알림을 보내드립니다!');
+    } else {
+        // 알림 비활성화
+        const icon = button.querySelector('i');
+        const text = button.querySelector('span');
+        icon.classList.remove('fas');
+        icon.classList.add('far');
+        text.textContent = '모임 생기면 알림 받기';
+        
+        // 로컬 스토리지에서 제거
+        if (currentUser && currentGiftId) {
+            const key = `notification_${currentUser.id}_${currentGiftId}`;
+            localStorage.removeItem(key);
+        }
     }
 }
 

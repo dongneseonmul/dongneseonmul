@@ -903,6 +903,117 @@ body {
     margin-top: 32px;
 }
 
+/* 같이가요 대기열 정보 */
+.together-waitlist {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: #F8F9FA;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+.waitlist-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.waitlist-avatars {
+    display: flex;
+    align-items: center;
+}
+
+.waitlist-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border: 2px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: -8px;
+}
+
+.waitlist-avatar:first-child {
+    margin-left: 0;
+}
+
+.waitlist-more {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    margin-left: -8px;
+}
+
+.waitlist-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.notify-button {
+    padding: 10px 16px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.notify-button:hover {
+    border-color: var(--secondary-color);
+    background: #F0FFFE;
+}
+
+.notify-button i {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.notify-button span {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.notify-button.active {
+    background: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.notify-button.active i,
+.notify-button.active span {
+    color: white;
+}
+
+.notify-button.active i {
+    font-weight: 900;
+}
+
+.notify-button.active i::before {
+    content: "\f0f3"; /* solid bell */
+}
+
 .together-cards {
     display: flex;
     flex-direction: column;

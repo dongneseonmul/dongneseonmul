@@ -123,6 +123,21 @@
                         <button class="section-action-button" onclick="createTogetherPost()">작성하기</button>
                     </div>
                     <p class="section-subtitle">같은 시간에 함께 방문할 사람을 찾아보세요</p>
+                    
+                    <!-- 대기열 정보 및 알림 받기 -->
+                    <div class="together-waitlist">
+                        <div class="waitlist-info">
+                            <div class="waitlist-avatars" id="detailWaitlistAvatars">
+                                <!-- 사용자 아바타들이 동적으로 추가됩니다 -->
+                            </div>
+                            <span class="waitlist-text" id="detailWaitlistText">0명이 이곳을 가고 싶어해요</span>
+                        </div>
+                        <button class="notify-button" id="detailNotifyButton" onclick="toggleNotification()">
+                            <i class="far fa-bell"></i>
+                            <span>모임 생기면 알림 받기</span>
+                        </button>
+                    </div>
+                    
                     <div id="detailTogetherCards" class="together-cards">
                         <!-- 같이가요 카드들이 동적으로 추가됩니다 -->
                     </div>
