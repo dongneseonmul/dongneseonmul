@@ -906,12 +906,18 @@ body {
 /* 같이가요 대기열 정보 */
 .together-waitlist {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     padding: 16px;
     background: #F8F9FA;
     border-radius: 12px;
     margin-bottom: 16px;
-    gap: 16px;
+    gap: 12px;
+}
+
+.waitlist-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .waitlist-avatars {
@@ -958,21 +964,21 @@ body {
     margin-left: -10px;
 }
 
-.waitlist-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
 .waitlist-text {
     font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
+    flex: 1;
+}
+
+.notify-message {
+    font-size: 13px;
+    color: var(--text-secondary);
+    flex: 1;
 }
 
 .notify-button {
-    padding: 10px 16px;
+    padding: 8px 14px;
     background: white;
     border: 1px solid var(--border-color);
     border-radius: 20px;
@@ -983,7 +989,7 @@ body {
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
-    align-self: flex-start;
+    flex-shrink: 0;
 }
 
 .notify-button:hover {
@@ -992,12 +998,12 @@ body {
 }
 
 .notify-button i {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-secondary);
 }
 
 .notify-button span {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text-primary);
 }

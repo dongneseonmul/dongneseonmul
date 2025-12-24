@@ -126,14 +126,17 @@
                     
                     <!-- 대기열 정보 및 알림 받기 -->
                     <div class="together-waitlist">
-                        <div class="waitlist-avatars" id="detailWaitlistAvatars">
-                            <!-- 항상 3개의 아바타 + ... 표시 -->
-                        </div>
-                        <div class="waitlist-content">
+                        <div class="waitlist-row">
+                            <div class="waitlist-avatars" id="detailWaitlistAvatars">
+                                <!-- 항상 3개의 아바타 + ... 표시 -->
+                            </div>
                             <span class="waitlist-text" id="detailWaitlistText">0명이 이곳을 가고 싶어해요</span>
+                        </div>
+                        <div class="waitlist-row">
+                            <span class="notify-message">모임이 생기면 알림을 받아보세요</span>
                             <button class="notify-button" id="detailNotifyButton" onclick="toggleNotification()">
                                 <i class="far fa-bell"></i>
-                                <span>모임 생기면 알림 받기</span>
+                                <span>알림 받기</span>
                             </button>
                         </div>
                     </div>
