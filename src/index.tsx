@@ -68,6 +68,119 @@ function toCamelCase(obj: any): any {
 // Authentication API
 // ============================================
 
+// ============================================
+// SMS Verification APIs (NHN Cloud)
+// ============================================
+
+// Store verification codes temporarily (in production, use KV or D1)
+const verificationCodes = new Map<string, { code: string; expiresAt: number }>()
+
+// Send SMS verification code
+app.post('/api/auth/send-sms', async (c) => {
+  const { phoneNumber } = await c.req.json()
+  
+  // Generate 6-digit verification code
+  const code = Math.floor(100000 + Math.random() * 900000).toString()
+  
+  // Store code with 5 minutes expiration
+  const expiresAt = Date.now() + 5 * 60 * 1000 // 5 minutes
+  verificationCodes.set(phoneNumber, { code, expiresAt })
+  
+  // NHN Cloud SMS API configuration
+  const SMS_API_URL = 'https://api-sms.cloud.toast.com/sms/v3.0/appKeys/tkm27YLJ8zJJVSAo/sender/sms'
+  const SECRET_KEY = 'YAYIwjrQQ85MZKHqPDOtcyVkobs3czcX'
+  const FROM_NUMBER = '07040367411'
+  
+  try {
+    // Send SMS via NHN Cloud
+    const response = await fetch(SMS_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+        'X-Secret-Key': SECRET_KEY
+      },
+      body: JSON.stringify({
+        body: `[같이사요] 인증번호는 [${code}] 입니다. 5분 이내에 입력해주세요.`,
+        sendNo: FROM_NUMBER,
+        recipientList: [
+          {
+            recipientNo: phoneNumber,
+            countryCode: '82'
+          }
+        ]
+      })
+    })
+    
+    const result = await response.json()
+    
+    console.log('📱 SMS 발송 결과:', result)
+    
+    if (!response.ok) {
+      console.error('❌ SMS 발송 실패:', result)
+      return c.json({ 
+        success: false, 
+        error: 'SMS 발송에 실패했습니다.',
+        details: result 
+      }, 500)
+    }
+    
+    return c.json({ 
+      success: true, 
+      message: '인증번호가 발송되었습니다.',
+      expiresIn: 300 // 5 minutes in seconds
+    })
+  } catch (error) {
+    console.error('❌ SMS 발송 오류:', error)
+    return c.json({ 
+      success: false, 
+      error: 'SMS 발송 중 오류가 발생했습니다.' 
+    }, 500)
+  }
+})
+
+// Verify SMS code
+app.post('/api/auth/verify-sms', async (c) => {
+  const { phoneNumber, code } = await c.req.json()
+  
+  const stored = verificationCodes.get(phoneNumber)
+  
+  if (!stored) {
+    return c.json({ 
+      success: false, 
+      error: '인증번호를 먼저 요청해주세요.' 
+    }, 400)
+  }
+  
+  // Check if code expired
+  if (Date.now() > stored.expiresAt) {
+    verificationCodes.delete(phoneNumber)
+    return c.json({ 
+      success: false, 
+      error: '인증번호가 만료되었습니다. 다시 요청해주세요.' 
+    }, 400)
+  }
+  
+  // Verify code
+  if (stored.code !== code) {
+    return c.json({ 
+      success: false, 
+      error: '인증번호가 일치하지 않습니다.' 
+    }, 400)
+  }
+  
+  // Clear verification code after successful verification
+  verificationCodes.delete(phoneNumber)
+  
+  return c.json({ 
+    success: true, 
+    message: '인증이 완료되었습니다.' 
+  })
+})
+
+// ============================================
+// Authentication APIs
+// ============================================
+
 // Check phone number and return user info
 app.post('/api/auth/check', async (c) => {
   const { phoneNumber } = await c.req.json()

@@ -2810,8 +2810,8 @@ function formatPhoneNumber(e) {
     }
 }
 
-// 인증 요청
-function requestVerification() {
+// 인증 요청 - 실제 SMS 발송
+async function requestVerification() {
     const nickname = document.getElementById('authNickname').value.trim();
     const phone = document.getElementById('authPhone').value.trim();
     
@@ -2831,24 +2831,41 @@ function requestVerification() {
         return;
     }
     
-    // 인증번호 생성 (실제로는 서버에서 SMS 발송)
-    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    // 전화번호에서 하이픈 제거
+    const phoneNumber = phone.replace(/-/g, '');
     
-    pendingVerification = {
-        phoneNumber: phone,
-        code: verificationCode,
-        nickname: nickname
-    };
-    
-    // 인증번호 섹션 표시
-    document.getElementById('verificationSection').style.display = 'block';
-    
-    // 개발용: 콘솔에 인증번호 출력
-    console.log('🔐 인증번호:', verificationCode);
-    alert(`인증번호가 전송되었습니다.\n\n[개발용] 인증번호: ${verificationCode}`);
+    try {
+        // SMS 발송 요청
+        const response = await fetch('/api/auth/send-sms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phoneNumber })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            pendingVerification = {
+                phoneNumber: phone,
+                nickname: nickname
+            };
+            
+            // 인증번호 섹션 표시
+            document.getElementById('verificationSection').style.display = 'block';
+            
+            alert('인증번호가 발송되었습니다.\n휴대폰으로 받은 인증번호를 입력해주세요.');
+            console.log('✅ SMS 발송 성공');
+        } else {
+            alert(result.error || 'SMS 발송에 실패했습니다.');
+            console.error('❌ SMS 발송 실패:', result);
+        }
+    } catch (error) {
+        console.error('❌ SMS 발송 오류:', error);
+        alert('SMS 발송 중 오류가 발생했습니다.');
+    }
 }
 
-// 인증 확인
+// 인증 확인 - 실제 SMS 인증번호 검증
 async function confirmVerification() {
     const inputCode = document.getElementById('authCode').value.trim();
     
@@ -2862,12 +2879,33 @@ async function confirmVerification() {
         return;
     }
     
-    // 인증번호 확인
-    if (inputCode === pendingVerification.code) {
-        // 인증 성공
-        await processLogin(pendingVerification.phoneNumber, pendingVerification.nickname);
-    } else {
-        alert('인증번호가 일치하지 않습니다.');
+    // 전화번호에서 하이픈 제거
+    const phoneNumber = pendingVerification.phoneNumber.replace(/-/g, '');
+    
+    try {
+        // 백엔드 API로 인증번호 검증
+        const response = await fetch('/api/auth/verify-sms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                phoneNumber,
+                code: inputCode 
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // 인증 성공 - 로그인 처리
+            console.log('✅ 인증 성공');
+            await processLogin(pendingVerification.phoneNumber, pendingVerification.nickname);
+        } else {
+            alert(result.error || '인증번호가 일치하지 않습니다.');
+            console.error('❌ 인증 실패:', result);
+        }
+    } catch (error) {
+        console.error('❌ 인증 검증 오류:', error);
+        alert('인증 확인 중 오류가 발생했습니다.');
     }
 }
 
