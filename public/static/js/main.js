@@ -377,6 +377,9 @@ async function showDetail(giftId) {
     console.log('🔍 같이가요 데이터:', gift.togetherPosts);
     renderTogetherCardsInDetail(gift.togetherPosts || []);
     
+    // 좋아요 버튼 상태 업데이트
+    updateDetailLikeButton(gift);
+    
     window.scrollTo(0, 0);
 }
 
@@ -1217,6 +1220,82 @@ async function toggleLike(id) {
         
         // 🔥 localStorage에도 저장
         localStorage.setItem('userLikes_' + phoneKey, JSON.stringify(userLikesDatabase[phoneKey]));
+    }
+    
+    // UI 업데이트
+    renderGiftCards();
+    
+    // 상세 페이지가 열려있으면 좋아요 버튼 업데이트
+    if (document.getElementById('detailPage').classList.contains('active') && currentGiftId === id) {
+        updateDetailLikeButton(gift);
+    }
+}
+
+// 상세 페이지 좋아요 버튼 업데이트
+function updateDetailLikeButton(gift) {
+    const likeButton = document.getElementById('detailLikeButton');
+    const likeCount = document.getElementById('detailLikeCount');
+    
+    if (!likeButton || !likeCount) return;
+    
+    // 좋아요 수 표시
+    likeCount.textContent = gift.likes || 0;
+    
+    // 좋아요 상태 표시
+    const isLiked = userLikes.gifts.includes(gift.id);
+    if (isLiked) {
+        likeButton.classList.add('liked');
+        likeButton.querySelector('i').classList.remove('far');
+        likeButton.querySelector('i').classList.add('fas');
+    } else {
+        likeButton.classList.remove('liked');
+        likeButton.querySelector('i').classList.remove('fas');
+        likeButton.querySelector('i').classList.add('far');
+    }
+}
+
+// 상세 페이지 좋아요 토글
+async function toggleDetailLike() {
+    if (!currentGiftId) return;
+    await toggleLike(currentGiftId);
+}
+
+// 상품 공유하기
+async function shareGift() {
+    if (!currentGiftId) return;
+    
+    const gift = sampleGifts.find(g => g.id === currentGiftId);
+    if (!gift) return;
+    
+    const shareData = {
+        title: `동네선물 - ${gift.productName}`,
+        text: `${gift.storeName}에서 ${gift.discountRate}% 환급 받으세요!`,
+        url: window.location.href
+    };
+    
+    try {
+        // Web Share API 지원 확인 (모바일)
+        if (navigator.share) {
+            await navigator.share(shareData);
+            console.log('✅ 공유 성공');
+        } else {
+            // 데스크톱: URL 복사
+            await navigator.clipboard.writeText(window.location.href);
+            alert('링크가 클립보드에 복사되었습니다!');
+        }
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            console.error('공유 오류:', error);
+            // 대체: URL 복사
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                alert('링크가 클립보드에 복사되었습니다!');
+            } catch (copyError) {
+                alert('공유 기능을 사용할 수 없습니다.');
+            }
+        }
+    }
+}
         console.log('✅ 좋아요 데이터 저장됨');
     }
     

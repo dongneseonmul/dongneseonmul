@@ -47,6 +47,15 @@
             <button class="back-button" onclick="navigateToMain()">
                 <i class="fas fa-arrow-left"></i>
             </button>
+            <div class="header-actions">
+                <button class="header-action-button" id="detailLikeButton" onclick="toggleDetailLike()">
+                    <i class="far fa-heart"></i>
+                    <span id="detailLikeCount">0</span>
+                </button>
+                <button class="header-action-button" onclick="shareGift()">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </div>
         </div>
 
         <main class="detail-content">

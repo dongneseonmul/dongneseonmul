@@ -73,6 +73,8 @@ body {
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    padding-right: 8px;
     z-index: 100;
 }
 
@@ -89,6 +91,56 @@ body {
     margin: 0;
     padding: 0;
     display: block;
+}
+
+/* 헤더 액션 버튼들 */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-action-button {
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.header-action-button:hover {
+    background: var(--background);
+}
+
+.header-action-button i {
+    font-size: 18px;
+    color: var(--text-primary);
+}
+
+.header-action-button span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-left: 4px;
+}
+
+.header-action-button.liked i {
+    color: var(--like-color);
+}
+
+.header-action-button.liked .fa-heart {
+    font-weight: 900;
+}
+
+.header-action-button.liked .fa-heart::before {
+    content: "\f004"; /* solid heart */
 }
 
 /* 뒤로가기 버튼 */
