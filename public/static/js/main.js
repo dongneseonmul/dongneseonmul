@@ -126,18 +126,8 @@ function createGiftCard(gift) {
     // 카드 정보
     const cardInfo = document.createElement('div');
     cardInfo.className = 'card-info';
-    // 환급률 계산 (일반 환급 ~ 공동구매 환급)
-    let refundText = '';
-    if (gift.groupBuys === null) {
-        // 공동구매 없음
-        refundText = `${gift.discountRate}% 환급`;
-    } else {
-        // 공동구매 있음
-        const groupBuyRate = gift.groupBuys && gift.groupBuys.length > 0 
-            ? gift.groupBuys[0].discountRate 
-            : gift.discountRate + 5;
-        refundText = `${gift.discountRate}~${groupBuyRate}% 환급`;
-    }
+    // 환급률 표시 (공동구매 환급률만 표시)
+    const refundText = `${gift.discountRate}% 환급`;
     
     cardInfo.innerHTML = `
         <p class="store-intro">${gift.storeIntro}</p>
@@ -352,8 +342,8 @@ async function showDetail(giftId) {
     const priceText = `${formatPrice(gift.discountedPrice)}`;
     document.getElementById('detailPrice').textContent = priceText;
     
-    // 환급률 - 공동구매 환급률 표시 (기본 환급률 + 5%)
-    const groupBuyDiscountRate = gift.discountRate + 5;
+    // 환급률 - 공동구매 환급률 표시
+    const groupBuyDiscountRate = gift.discountRate;
     const refundRateText = `${groupBuyDiscountRate}% 환급`;
     document.getElementById('detailRefundRate').textContent = refundRateText;
     
