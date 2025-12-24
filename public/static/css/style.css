@@ -137,7 +137,7 @@ body {
 }
 
 .header-action-button.liked i {
-    color: var(--like-color);
+    color: var(--primary-color);
 }
 
 .header-action-button.liked .fa-heart {
