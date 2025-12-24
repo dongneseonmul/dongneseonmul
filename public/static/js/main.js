@@ -375,7 +375,7 @@ async function showDetail(giftId) {
     
     // 같이가요 카드 렌더링
     console.log('🔍 같이가요 데이터:', gift.togetherPosts);
-    renderTogetherWaitlist(gift.togetherPosts || []);
+    renderTogetherWaitlist(gift);
     renderTogetherCardsInDetail(gift.togetherPosts || []);
     
     // 좋아요 버튼 상태 업데이트
@@ -795,8 +795,8 @@ function processJoinGroupBuy(id) {
     }
 }
 
-// 같이가요 대기열 렌더링
-function renderTogetherWaitlist(posts) {
+// 같이가요 대기열 렌더링 (좋아요 수 기반)
+function renderTogetherWaitlist(gift) {
     const avatarsContainer = document.getElementById('detailWaitlistAvatars');
     const waitlistText = document.getElementById('detailWaitlistText');
     
@@ -804,46 +804,32 @@ function renderTogetherWaitlist(posts) {
     
     avatarsContainer.innerHTML = '';
     
-    // 고유한 사용자 수 계산 (게시글 작성자들)
-    const uniqueUsers = new Set();
-    if (posts && Array.isArray(posts)) {
-        posts.forEach(post => {
-            if (post.userId) {
-                uniqueUsers.add(post.userId);
-            }
-        });
-    }
+    // 좋아요 수 가져오기
+    const likesCount = gift?.likes || 0;
     
-    const userCount = uniqueUsers.size;
-    
-    // 최대 3개의 아바타 표시
-    const displayCount = Math.min(userCount, 3);
+    // 항상 3개의 아바타 표시 (사람 아이콘)
     const colors = [
         'linear-gradient(135deg, #FF6B6B, #FF8E53)',
         'linear-gradient(135deg, #4ECDC4, #44A08D)',
-        'linear-gradient(135deg, #A8E6CF, #56AB91)',
-        'linear-gradient(135deg, #FFD93D, #F7B731)',
-        'linear-gradient(135deg, #6C5CE7, #A29BFE)'
+        'linear-gradient(135deg, #A8E6CF, #56AB91)'
     ];
     
-    for (let i = 0; i < displayCount; i++) {
+    for (let i = 0; i < 3; i++) {
         const avatar = document.createElement('div');
         avatar.className = 'waitlist-avatar';
-        avatar.style.background = colors[i % colors.length];
-        avatar.textContent = String.fromCharCode(65 + i); // A, B, C
+        avatar.style.background = colors[i];
+        avatar.innerHTML = '<i class="fas fa-user"></i>';
         avatarsContainer.appendChild(avatar);
     }
     
-    // 더 많은 사용자가 있으면 ... 표시
-    if (userCount > 3) {
-        const more = document.createElement('div');
-        more.className = 'waitlist-more';
-        more.textContent = '...';
-        avatarsContainer.appendChild(more);
-    }
+    // 항상 ... 표시
+    const more = document.createElement('div');
+    more.className = 'waitlist-more';
+    more.textContent = '...';
+    avatarsContainer.appendChild(more);
     
-    // 텍스트 업데이트
-    waitlistText.textContent = `${userCount}명이 이곳을 가고 싶어해요`;
+    // 좋아요 수 표시
+    waitlistText.textContent = `${likesCount}명이 이곳을 가고 싶어해요`;
 }
 
 // 알림 토글
