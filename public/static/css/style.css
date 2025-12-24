@@ -73,9 +73,14 @@ body {
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 8px;
     padding-right: 8px;
     z-index: 100;
+}
+
+/* 동네선물 상세페이지만 space-between 유지 (좋아요/공유 버튼 오른쪽 배치) */
+#detailPage .detail-header {
+    justify-content: space-between;
 }
 
 #detailPage .detail-header,
