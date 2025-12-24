@@ -12,7 +12,7 @@ const userLikesDatabase = {
 
 // 현재 사용자의 좋아요 데이터 (로그인 시 로드됨)
 const userLikes = {
-    gifts: [], // 좋아요한 동네선물 ID 배열
+    gifts: [], // 좋아요한 같이사요 ID 배열
     togetherPosts: [] // 좋아요한 같이가요 ID 배열
 };
 

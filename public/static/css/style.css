@@ -78,7 +78,7 @@ body {
     z-index: 100;
 }
 
-/* 동네선물 상세페이지만 space-between 유지 (좋아요/공유 버튼 오른쪽 배치) */
+/* 같이사요 상세페이지만 space-between 유지 (좋아요/공유 버튼 오른쪽 배치) */
 #detailPage .detail-header {
     justify-content: space-between;
 }

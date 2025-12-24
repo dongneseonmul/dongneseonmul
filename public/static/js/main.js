@@ -4,7 +4,7 @@ console.log('💾 main.js LOADED - VERSION: FINAL-100 (localStorage 저장/복�
 // 🔥 sampleGifts localStorage 저장/복원 함수
 function saveSampleGifts() {
     localStorage.setItem('sampleGifts', JSON.stringify(sampleGifts));
-    console.log('✅ 동네선물 데이터 저장됨 (공동구매 포함)');
+    console.log('✅ 같이사요 데이터 저장됨 (공동구매 포함)');
 }
 
 function restoreSampleGifts() {
@@ -28,9 +28,9 @@ function restoreSampleGifts() {
                     }
                 }
             });
-            console.log('✅ 동네선물 데이터 복원 완료');
+            console.log('✅ 같이사요 데이터 복원 완료');
         } catch (e) {
-            console.error('❌ 동네선물 데이터 복원 실패:', e);
+            console.error('❌ 같이사요 데이터 복원 실패:', e);
         }
     }
 }
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     renderPurchaseHistory();
 });
 
-// API에서 동네선물 데이터 로드
+// API에서 같이사요 데이터 로드
 async function loadGiftsFromAPI() {
     try {
         const gifts = await API.getGifts();
@@ -72,13 +72,13 @@ async function loadGiftsFromAPI() {
             // sampleGifts를 API 데이터로 교체
             sampleGifts.length = 0;
             sampleGifts.push(...gifts);
-            console.log('✅ API에서 동네선물 데이터 로드:', gifts.length, '개');
+            console.log('✅ API에서 같이사요 데이터 로드:', gifts.length, '개');
         } else {
             // API 실패 시 로컬 데이터 복원
             restoreSampleGifts();
         }
     } catch (error) {
-        console.error('❌ 동네선물 데이터 로드 실패:', error);
+        console.error('❌ 같이사요 데이터 로드 실패:', error);
         // 폴백: 로컬 데이터 사용
         restoreSampleGifts();
     }
@@ -1346,7 +1346,7 @@ async function shareGift() {
     if (!gift) return;
     
     const shareData = {
-        title: `동네선물 - ${gift.productName}`,
+        title: `같이사요 - ${gift.productName}`,
         text: `${gift.storeName}에서 ${gift.discountRate}% 환급 받으세요!`,
         url: window.location.href
     };
@@ -1413,7 +1413,7 @@ function toggleTogetherLike(id) {
     // 카드 UI 업데이트
     renderTogetherCards();
     
-    // 🔥 동네선물 상세 페이지의 같이가요 섹션이 열려있다면 업데이트
+    // 🔥 같이사요 상세 페이지의 같이가요 섹션이 열려있다면 업데이트
     if (document.getElementById('detailPage').classList.contains('active')) {
         const gift = sampleGifts.find(g => g.id === currentGiftId);
         if (gift && gift.togetherPosts) {
@@ -2037,7 +2037,7 @@ function navigateToMyLikes() {
     document.getElementById('myPage').classList.remove('active');
     document.getElementById('myLikesPage').classList.add('active');
     
-    // 동네선물 탭 표시
+    // 같이사요 탭 표시
     switchLikesTab('gifts');
     
     window.scrollTo(0, 0);
@@ -2064,7 +2064,7 @@ function switchLikesTab(tab) {
     }
 }
 
-// 좋아요한 동네선물 렌더링
+// 좋아요한 같이사요 렌더링
 function renderLikedGifts() {
     const container = document.getElementById('likedGiftsCards');
     container.innerHTML = '';
@@ -2072,7 +2072,7 @@ function renderLikedGifts() {
     const likedGifts = sampleGifts.filter(gift => userLikes.gifts.includes(gift.id));
     
     if (likedGifts.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">좋아요한 동네선물이 없습니다.</p>';
+        container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">좋아요한 같이사요가 없습니다.</p>';
         return;
     }
     
@@ -2623,7 +2623,7 @@ async function restoreLoginState() {
             userLikesDatabase[phoneKey] = savedLikes;
             userLikes.gifts = [...savedLikes.gifts];
             userLikes.togetherPosts = [...savedLikes.togetherPosts];
-            console.log('✅ 좋아요 데이터 복원됨:', savedLikes.gifts.length, '개 동네선물,', savedLikes.togetherPosts.length, '개 같이가요');
+            console.log('✅ 좋아요 데이터 복원됨:', savedLikes.gifts.length, '개 같이사요,', savedLikes.togetherPosts.length, '개 같이가요');
         } else if (userLikesDatabase[phoneKey]) {
             // 백업: 메모리에만 있는 경우
             userLikes.gifts = [...userLikesDatabase[phoneKey].gifts];
