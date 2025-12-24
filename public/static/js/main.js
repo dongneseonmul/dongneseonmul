@@ -374,7 +374,7 @@ async function showDetail(giftId) {
     
     // 공동구매 카드 렌더링
     console.log('🔍 공동구매 데이터:', gift.groupBuys);
-    renderGroupBuyCards(gift.groupBuys);
+    renderGroupBuyCards(gift.groupBuys, gift.discountRate);
     
     // 같이가요 카드 렌더링
     console.log('🔍 같이가요 데이터:', gift.togetherPosts);
@@ -631,7 +631,7 @@ function createCommentElement(comment, isModal = false, index = 0) {
 }
 
 // 공동구매 카드 렌더링
-function renderGroupBuyCards(groupBuys) {
+function renderGroupBuyCards(groupBuys, giftDiscountRate) {
     const section = document.querySelector('.group-buy-section');
     const container = document.getElementById('detailGroupBuyCards');
     const viewAllBtn = document.getElementById('viewAllGroupBuysBtn');
@@ -654,7 +654,7 @@ function renderGroupBuyCards(groupBuys) {
     }
     
     groupBuys.forEach(groupBuy => {
-        const card = createGroupBuyCard(groupBuy);
+        const card = createGroupBuyCard(groupBuy, giftDiscountRate);
         container.appendChild(card);
     });
     
@@ -669,7 +669,7 @@ function renderGroupBuyCards(groupBuys) {
 }
 
 // 공동구매 카드 생성
-function createGroupBuyCard(groupBuy) {
+function createGroupBuyCard(groupBuy, giftDiscountRate) {
     const card = document.createElement('div');
     card.className = 'group-buy-card';
     
@@ -699,9 +699,12 @@ function createGroupBuyCard(groupBuy) {
     }
     actionHTML += '</div>';
     
+    // giftDiscountRate가 제공되면 사용, 아니면 groupBuy.discountRate 사용 (하위 호환성)
+    const discountRate = giftDiscountRate !== undefined ? giftDiscountRate : groupBuy.discountRate;
+    
     card.innerHTML = `
         <div class="group-buy-header">
-            <span class="group-buy-discount">${groupBuy.discountRate}% 환급</span>
+            <span class="group-buy-discount">${discountRate}% 환급</span>
             <span class="group-buy-time">${groupBuy.createdAt}</span>
         </div>
         <div class="group-buy-content">
